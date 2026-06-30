@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Dashboard')}"></head>
+<body class="app-body">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: header('Choose a section to explore detailed data')}"></header>
+
+    <div class="card-grid card-grid-3">
+        <a th:href="@{/dashboard/plcs}" class="app-card nav-card">
+            <div class="card-icon">⚙️</div>
+            <h2 class="card-title">PLCs</h2>
+            <p class="card-desc" th:text="${plcCount} + ' controller(s) in the system'">0 controllers</p>
+        </a>
+        <a th:href="@{/dashboard/lines}" class="app-card nav-card">
+            <div class="card-icon">🏭</div>
+            <h2 class="card-title">Lines</h2>
+            <p class="card-desc" th:text="${lineCount} + ' production line(s)'">0 lines</p>
+        </a>
+        <a th:href="@{/dashboard/barcodes}" class="app-card nav-card">
+            <div class="card-icon">📦</div>
+            <h2 class="card-title">Barcodes</h2>
+            <p class="card-desc" th:text="${barcodeCount} + ' processed barcode(s)'">0 barcodes</p>
+        </a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('PLCs')}"></head>
+<body class="app-body">
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: back-dashboard}"></div>
+    <header th:replace="~{fragments/layout :: header('All PLC controllers and their current status')}"></header>
+
+    <div class="panel-card">
+        <h2>PLC List</h2>
+        <div th:if="${plcs.isEmpty()}" class="empty-state">No PLCs found in the database.</div>
+        <div th:unless="${plcs.isEmpty()}" class="table-scroll">
+            <table class="table-modern">
+                <thead>
+                <tr>
+                    <th>PLC ID</th>
+                    <th>PLC IP</th>
+                    <th>Status</th>
+                    <th>Last Status Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="plc : ${plcs}">
+                    <td th:text="${plc.plcId}">PLC-1</td>
+                    <td th:text="${plc.plcIp}">10.0.0.1</td>
+                    <td><span th:replace="~{fragments/layout :: status-badge(${plc.status})}"></span></td>
+                    <td th:text="${plc.statusDate != null ? #temporals.format(plc.statusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

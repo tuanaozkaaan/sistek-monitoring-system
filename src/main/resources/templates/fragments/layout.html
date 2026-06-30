@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header(subtitle)" class="app-header">
+    <h1>Analysis Dashboard</h1>
+    <p th:text="${subtitle}">Real-time overview of PLCs, production lines and barcodes.</p>
+</header>
+
+<div th:fragment="back-dashboard" class="nav-row">
+    <a th:href="@{/dashboard}" class="btn-back">← Back to Dashboard</a>
+</div>
+
+<div th:fragment="back-lines" class="nav-row">
+    <a th:href="@{/dashboard/lines}" class="btn-back">← Back to Lines</a>
+</div>
+
+<span th:fragment="status-badge(status)"
+      th:with="normalized=${#strings.toUpperCase(status)}"
+      th:class="${'badge-status ' + (
+          normalized == 'RUN' or normalized == 'ACTIVE' or normalized == 'SENT' or normalized == 'NEW' ? 'badge-run' :
+          normalized == 'STOP' or normalized == 'ERROR' or normalized == 'NOCOMM' ? 'badge-stop' :
+          normalized == 'PASSIVE' ? 'badge-passive' : 'badge-default'
+      )}"
+      th:text="${status}">STATUS</span>
+</body>
+</html>

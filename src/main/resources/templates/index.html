@@ -1,11 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Example Thymeleaf Page</title>
-</head>
-<body>
-<h1 th:text="${message}">Hello, Thymeleaf!</h1>
-<a th:href="@{/example}">Go to Example Page</a>
+<head th:replace="~{fragments/head :: head('Home')}"></head>
+<body class="app-body">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: header('Production monitoring at a glance')}"></header>
+
+    <div class="card-grid card-grid-home">
+        <div class="app-card stat-card">
+            <div class="card-icon">⚙️</div>
+            <div class="stat-label">PLCs</div>
+            <div class="stat-value" th:text="${plcCount}">0</div>
+        </div>
+        <div class="app-card stat-card">
+            <div class="card-icon">🏭</div>
+            <div class="stat-label">Lines</div>
+            <div class="stat-value" th:text="${lineCount}">0</div>
+        </div>
+        <div class="app-card stat-card">
+            <div class="card-icon">📦</div>
+            <div class="stat-label">Barcodes</div>
+            <div class="stat-value" th:text="${barcodeCount}">0</div>
+        </div>
+    </div>
+
+    <div class="cta-center">
+        <a th:href="@{/dashboard}" class="btn-primary-pink">Go to Dashboard →</a>
+    </div>
+</div>
 </body>
 </html>

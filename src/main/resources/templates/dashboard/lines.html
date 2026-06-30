@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Lines')}"></head>
+<body class="app-body">
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: back-dashboard}"></div>
+    <header th:replace="~{fragments/layout :: header('Production lines with status and barcode counts')}"></header>
+
+    <div class="panel-card">
+        <h2>Line List</h2>
+        <div th:if="${lines.isEmpty()}" class="empty-state">No lines found in the database.</div>
+        <div th:unless="${lines.isEmpty()}" class="table-scroll">
+            <table class="table-modern">
+                <thead>
+                <tr>
+                    <th>Line ID</th>
+                    <th>Line Name</th>
+                    <th>Status</th>
+                    <th>Last Status Date</th>
+                    <th>Barcodes</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="line : ${lines}">
+                    <td th:text="${line.lineId}">1</td>
+                    <td th:text="${line.lineName}">Line-1</td>
+                    <td><span th:replace="~{fragments/layout :: status-badge(${line.status})}"></span></td>
+                    <td th:text="${line.statusDate != null ? #temporals.format(line.statusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                    <td th:text="${line.barcodes.size()}">0</td>
+                    <td>
+                        <a th:href="@{/dashboard/lines/{id}(id=${line.lineId})}" class="btn-details">Details</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

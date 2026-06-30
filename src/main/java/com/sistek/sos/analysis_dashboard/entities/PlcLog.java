@@ -3,6 +3,7 @@ package com.sistek.sos.analysis_dashboard.entities;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -10,19 +11,20 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "plc_info")
-public class PlcInfo {
+@IdClass(PlcLogId.class)
+@Table(name = "plc_log")
+public class PlcLog {
     @Id
     @Column(name = "plc_id", nullable = false)
     private String plcId;
 
-    @Column(name = "last_status_date", nullable = false)
-    private LocalDateTime lastStatusDate;
+    @Id
+    @Column(name = "seq_no", nullable = false)
+    private Long seqNo;
 
-    @Column(name = "plc_ip", nullable = false)
-    private String plcIp;
+    @Column(name = "proc_date", nullable = false)
+    private LocalDateTime procDate;
 
     @Column(name = "status", nullable = false)
     private String status;
 }
-

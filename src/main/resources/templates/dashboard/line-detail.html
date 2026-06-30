@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Line Detail')}"></head>
+<body class="app-body">
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: back-lines}"></div>
+    <header th:replace="~{fragments/layout :: header('Line information and processed barcodes')}"></header>
+
+    <div class="panel-card mb-4">
+        <h2 th:text="'Line ' + ${line.lineId} + ' — ' + ${line.lineName}">Line Detail</h2>
+        <div class="line-meta">
+            <div class="meta-item">
+                <div class="label">Line ID</div>
+                <div class="value" th:text="${line.lineId}">1</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Line Name</div>
+                <div class="value" th:text="${line.lineName}">Line-1</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Status</div>
+                <div class="value"><span th:replace="~{fragments/layout :: status-badge(${line.status})}"></span></div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Last Status Date</div>
+                <div class="value" th:text="${line.statusDate != null ? #temporals.format(line.statusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Processed Barcodes</div>
+                <div class="value" th:text="${line.barcodes.size()}">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-card">
+        <h2>Processed Barcodes</h2>
+        <div th:if="${line.barcodes.isEmpty()}" class="empty-state">No barcodes processed for this line.</div>
+        <div th:unless="${line.barcodes.isEmpty()}" class="table-scroll">
+            <table class="table-modern">
+                <thead>
+                <tr>
+                    <th>Barcode</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Last Status Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="barcode : ${line.barcodes}">
+                    <td th:text="${barcode.barcode}">BC-001</td>
+                    <td><span th:replace="~{fragments/layout :: status-badge(${barcode.status})}"></span></td>
+                    <td th:text="${barcode.creDate != null ? #temporals.format(barcode.creDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                    <td th:text="${barcode.lastStatusDate != null ? #temporals.format(barcode.lastStatusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
