@@ -13,5 +13,6 @@ public class LineDashboardView {
     private String lineName;
     private String status;
     private LocalDateTime statusDate;
+    private long barcodeCount;
     private List<BarcodeData> barcodes = new ArrayList<>();
 }

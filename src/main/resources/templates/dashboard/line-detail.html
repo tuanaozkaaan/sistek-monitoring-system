@@ -27,35 +27,55 @@
             </div>
             <div class="meta-item">
                 <div class="label">Processed Barcodes</div>
-                <div class="value" th:text="${line.barcodes.size()}">0</div>
+                <div class="value" th:text="${line.barcodeCount}">0</div>
             </div>
         </div>
     </div>
 
-    <div class="panel-card">
+    <div class="panel-card"
+         id="barcode-panel"
+         th:attr="data-fetch-url=@{/dashboard/lines/{id}/barcodes(id=${line.lineId})}"
+         data-show-line-column="false"
+         data-column-count="4"
+         th:data-page-size="${barcodePageSize}"
+         th:data-total-pages="${totalPages}"
+         th:data-current-page="${currentPage}"
+         th:data-total-elements="${line.barcodeCount}">
         <h2>Processed Barcodes</h2>
-        <div th:if="${line.barcodes.isEmpty()}" class="empty-state">No barcodes processed for this line.</div>
-        <div th:unless="${line.barcodes.isEmpty()}" class="table-scroll">
-            <table class="table-modern">
-                <thead>
-                <tr>
-                    <th>Barcode</th>
-                    <th>Status</th>
-                    <th>Created Date</th>
-                    <th>Last Status Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="barcode : ${line.barcodes}">
-                    <td th:text="${barcode.barcode}">BC-001</td>
-                    <td><span th:replace="~{fragments/layout :: status-badge(${barcode.status})}"></span></td>
-                    <td th:text="${barcode.creDate != null ? #temporals.format(barcode.creDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
-                    <td th:text="${barcode.lastStatusDate != null ? #temporals.format(barcode.lastStatusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
-                </tr>
-                </tbody>
-            </table>
+        <div th:if="${line.barcodeCount == 0}" class="empty-state">No barcodes processed for this line.</div>
+        <div th:unless="${line.barcodeCount == 0}">
+            <p id="pagination-info" class="pagination-info"></p>
+            <div class="table-scroll">
+                <table class="table-modern">
+                    <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th>Last Status Date</th>
+                    </tr>
+                    </thead>
+                    <tbody id="barcode-table-body">
+                    <tr th:each="barcode : ${line.barcodes}">
+                        <td th:text="${barcode.barcode}">BC-001</td>
+                        <td><span th:replace="~{fragments/layout :: status-badge(${barcode.status})}"></span></td>
+                        <td th:text="${barcode.creDate != null ? #temporals.format(barcode.creDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                        <td th:text="${barcode.lastStatusDate != null ? #temporals.format(barcode.lastStatusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-wrap" th:classappend="${totalPages <= 1} ? ' d-none' : ''">
+                <nav class="pagination-nav" aria-label="Barcode pagination">
+                    <button type="button" id="page-prev" class="pagination-btn pagination-arrow" aria-label="Previous page">←</button>
+                    <div id="pagination-pages" class="pagination-pages"></div>
+                    <button type="button" id="page-next" class="pagination-btn pagination-arrow" aria-label="Next page">→</button>
+                </nav>
+            </div>
+            <p id="pagination-loading" class="pagination-loading d-none">Loading...</p>
         </div>
     </div>
 </div>
+<script th:src="@{/js/barcode-pagination.js}"></script>
 </body>
 </html>

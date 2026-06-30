@@ -1,4 +1,4 @@
-# sistek-monitoring-system
+
 # Sistek Monitoring System
 
 A modern Spring Boot dashboard for monitoring production processes in real time. The system provides a clean and user-friendly interface to monitor PLC status, production lines, and barcode information.
@@ -26,7 +26,7 @@ A modern Spring Boot dashboard for monitoring production processes in real time.
 
 ## 📂 Project Structure
 
-```
+
 src
 ├── controller
 ├── service
@@ -37,7 +37,7 @@ src
 │   ├── dashboard
 │   └── fragments
 └── static
-```
+
 
 ## 📷 Dashboard
 
@@ -52,27 +52,27 @@ The dashboard provides an overview of:
 
 Clone the repository:
 
-```bash
+bash
 git clone https://github.com/tuanaozkaaan/sistek-monitoring-system.git
-```
+
 
 Navigate to the project:
 
-```bash
+bash
 cd sistek-monitoring-system
-```
+
 
 Run the application:
 
-```bash
+bash
 ./mvnw spring-boot:run
-```
+
 
 The application will be available at:
 
-```
+
 http://localhost:8080
-```
+
 
 ## 📌 Project Purpose
 

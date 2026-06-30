@@ -27,7 +27,7 @@
                     <td th:text="${line.lineName}">Line-1</td>
                     <td><span th:replace="~{fragments/layout :: status-badge(${line.status})}"></span></td>
                     <td th:text="${line.statusDate != null ? #temporals.format(line.statusDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</td>
-                    <td th:text="${line.barcodes.size()}">0</td>
+                    <td th:text="${line.barcodeCount}">0</td>
                     <td>
                         <a th:href="@{/dashboard/lines/{id}(id=${line.lineId})}" class="btn-details">Details</a>
                     </td>

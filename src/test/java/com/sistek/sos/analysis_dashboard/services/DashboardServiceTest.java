@@ -15,6 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,11 +54,10 @@ class DashboardServiceTest {
     void getLinesWithBarcodes_usesLatestLogStatusAndLoadsBarcodes() {
         LineInfo line = line("L1", "Line-1", "STOP", INFO_DATE);
         LineLog log = lineLog("L1", 2L, "RUN", LOG_DATE);
-        BarcodeData barcode = barcode("BC-001", "L1");
 
         when(lineInfoService.getAllLineInfo()).thenReturn(List.of(line));
         when(lineLogRepository.findTopByLineIdOrderBySeqNoDesc("L1")).thenReturn(Optional.of(log));
-        when(barcodeDataRepository.findByLineIdOrderByCreDateDesc("L1")).thenReturn(List.of(barcode));
+        when(barcodeDataRepository.countByLineId("L1")).thenReturn(1L);
 
         List<LineDashboardView> lines = dashboardService.getLinesWithBarcodes();
 
@@ -64,7 +66,8 @@ class DashboardServiceTest {
         assertThat(lines.get(0).getLineName()).isEqualTo("Line-1");
         assertThat(lines.get(0).getStatus()).isEqualTo("RUN");
         assertThat(lines.get(0).getStatusDate()).isEqualTo(LOG_DATE);
-        assertThat(lines.get(0).getBarcodes()).containsExactly(barcode);
+        assertThat(lines.get(0).getBarcodeCount()).isEqualTo(1L);
+        assertThat(lines.get(0).getBarcodes()).isEmpty();
     }
 
     @Test
@@ -73,12 +76,13 @@ class DashboardServiceTest {
 
         when(lineInfoService.getAllLineInfo()).thenReturn(List.of(line));
         when(lineLogRepository.findTopByLineIdOrderBySeqNoDesc("L2")).thenReturn(Optional.empty());
-        when(barcodeDataRepository.findByLineIdOrderByCreDateDesc("L2")).thenReturn(List.of());
+        when(barcodeDataRepository.countByLineId("L2")).thenReturn(0L);
 
         LineDashboardView view = dashboardService.getLinesWithBarcodes().get(0);
 
         assertThat(view.getStatus()).isEqualTo("PASSIVE");
         assertThat(view.getStatusDate()).isEqualTo(INFO_DATE);
+        assertThat(view.getBarcodeCount()).isZero();
         assertThat(view.getBarcodes()).isEmpty();
     }
 
@@ -96,6 +100,43 @@ class DashboardServiceTest {
         assertThat(view.getPlcIp()).isEqualTo("10.0.0.1");
         assertThat(view.getStatus()).isEqualTo("ACTIVE");
         assertThat(view.getStatusDate()).isEqualTo(LOG_DATE);
+    }
+
+    @Test
+    void getLineById_loadsFirstBarcodePageOnly() {
+        LineInfo line = line("L1", "Line-1", "RUN", INFO_DATE);
+        BarcodeData barcode = barcode("BC-001", "L1");
+        Page<BarcodeData> page = new PageImpl<>(List.of(barcode), PageRequest.of(0, 20), 45);
+
+        when(lineInfoService.getLineInfoById("L1")).thenReturn(Optional.of(line));
+        when(lineLogRepository.findTopByLineIdOrderBySeqNoDesc("L1")).thenReturn(Optional.empty());
+        when(barcodeDataRepository.countByLineId("L1")).thenReturn(45L);
+        when(barcodeDataRepository.findByLineIdOrderByCreDateDesc("L1", PageRequest.of(0, 20))).thenReturn(page);
+
+        LineDashboardView view = dashboardService.getLineById("L1").orElseThrow();
+
+        assertThat(view.getBarcodeCount()).isEqualTo(45L);
+        assertThat(view.getBarcodes()).containsExactly(barcode);
+    }
+
+    @Test
+    void getLineBarcodesPage_returnsEmptyWhenLineMissing() {
+        when(lineInfoService.getLineInfoById("missing")).thenReturn(Optional.empty());
+
+        assertThat(dashboardService.getLineBarcodesPage("missing", 0, 20)).isEmpty();
+    }
+
+    @Test
+    void getAllBarcodesPage_returnsPagedBarcodes() {
+        BarcodeData barcode = barcode("BC-001", "L1");
+        Page<BarcodeData> page = new PageImpl<>(List.of(barcode), PageRequest.of(0, 20), 100);
+
+        when(barcodeDataRepository.findAllByOrderByCreDateDesc(PageRequest.of(0, 20))).thenReturn(page);
+
+        Page<BarcodeData> result = dashboardService.getAllBarcodesPage(0, 20);
+
+        assertThat(result.getContent()).containsExactly(barcode);
+        assertThat(result.getTotalElements()).isEqualTo(100);
     }
 
     private LineInfo line(String id, String name, String status, LocalDateTime date) {

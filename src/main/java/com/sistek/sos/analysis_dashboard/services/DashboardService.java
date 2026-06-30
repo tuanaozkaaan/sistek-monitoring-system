@@ -11,14 +11,18 @@ import com.sistek.sos.analysis_dashboard.repositories.BarcodeDataRepository;
 import com.sistek.sos.analysis_dashboard.repositories.LineLogRepository;
 import com.sistek.sos.analysis_dashboard.repositories.PlcLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DashboardService {
+
+    public static final int BARCODE_PAGE_SIZE = 20;
 
     private final LineInfoService lineInfoService;
     private final PlcInfoService plcInfoService;
@@ -65,20 +69,41 @@ public class DashboardService {
     }
 
     public Optional<LineDashboardView> getLineById(String lineId) {
-        return lineInfoService.getLineInfoById(lineId).map(this::buildLineView);
+        return lineInfoService.getLineInfoById(lineId).map(line -> {
+            LineDashboardView view = buildLineView(line);
+            Page<BarcodeData> firstPage = barcodeDataRepository.findByLineIdOrderByCreDateDesc(
+                    lineId, PageRequest.of(0, BARCODE_PAGE_SIZE));
+            view.setBarcodes(firstPage.getContent());
+            return view;
+        });
     }
 
-    public List<BarcodeData> getAllBarcodes() {
-        return barcodeDataRepository.findAll().stream()
-                .sorted(Comparator.comparing(BarcodeData::getCreDate).reversed())
-                .toList();
+    public Optional<Page<BarcodeData>> getLineBarcodesPage(String lineId, int page, int size) {
+        if (lineInfoService.getLineInfoById(lineId).isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(fetchBarcodePage(page, size, lineId));
+    }
+
+    public Page<BarcodeData> getAllBarcodesPage(int page, int size) {
+        return fetchBarcodePage(page, size, null);
+    }
+
+    private Page<BarcodeData> fetchBarcodePage(int page, int size, String lineId) {
+        int safeSize = Math.max(1, Math.min(size, 100));
+        int safePage = Math.max(0, page);
+        Pageable pageable = PageRequest.of(safePage, safeSize);
+        if (lineId == null) {
+            return barcodeDataRepository.findAllByOrderByCreDateDesc(pageable);
+        }
+        return barcodeDataRepository.findByLineIdOrderByCreDateDesc(lineId, pageable);
     }
 
     private LineDashboardView buildLineView(LineInfo line) {
         LineDashboardView view = new LineDashboardView();
         view.setLineId(line.getLineId());
         view.setLineName(line.getLineName());
-        view.setBarcodes(barcodeDataRepository.findByLineIdOrderByCreDateDesc(line.getLineId()));
+        view.setBarcodeCount(barcodeDataRepository.countByLineId(line.getLineId()));
 
         lineLogRepository.findTopByLineIdOrderBySeqNoDesc(line.getLineId())
                 .ifPresentOrElse(
